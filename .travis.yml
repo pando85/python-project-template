@@ -1,12 +1,8 @@
 ---
 
 language: python
-addons:
-  chrome: stable
-  firefox: latest
 python:
   - '3.6'
-services: docker
 
 # Only execute travis in master or PR to master
 branches:
@@ -14,26 +10,20 @@ branches:
   - master
 
 stages:
-  - name: "[backend] unit tests"
-  - name: "[backend] update-dependencies"
+  - name: "unit tests"
+  - name: "update-dependencies"
     if: branch = master AND type != pull_request
-  - name: "[frontend] unit test"
-  - name: "end to end tests"
   - name: dockerhub-build
     if: branch = master AND type != pull_request
 
 jobs:
   include:
-    - stage: "[backend] unit tests"
-      before_install:
-        - cd api
+    - stage: "unit tests"
       install:
         - pip install -r requirements_test.txt
       script:
         - make test
-    - stage: "[backend] update-dependencies"
-      before_install:
-        - cd api
+    - stage: "update-dependencies"
       install:
         - pip install -r requirements_test.txt
         - bash scripts/update_dependencies.sh
@@ -47,23 +37,6 @@ jobs:
         - git push "https://$GITHUB_TOKEN@github.com/$TRAVIS_REPO_SLUG" HEAD:$TRAVIS_BRANCH
       env:
         - secure: __GITHUB_TOKEN__
-    - stage: "[frontend] unit test"
-      before_install:
-        - cd front
-      install:
-        - npm install
-      script:
-        - npm run lint
-        - npm run test:unit
-    - stage: "end to end tests"
-      install:
-        - skip
-      before_script:
-        - "export DISPLAY=:99.0"
-        - "sh -e /etc/init.d/xvfb start"
-        - sleep 3
-      script:
-        - make test
     - stage: dockerhub-build
       install: skip
       script:
