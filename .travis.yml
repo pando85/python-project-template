@@ -46,7 +46,7 @@ jobs:
         - git commit -m 'Update requirements.txt'
         - git push "https://$GITHUB_TOKEN@github.com/$TRAVIS_REPO_SLUG" HEAD:$TRAVIS_BRANCH
       env:
-        - secure: "L60kLhxygNBe5vrxAzj7k2UJRuhs7x0vOceuF8NNphWGCFG2V6kqMyJn83tBDHhnGAGS1/yVX8EFwo0HwuhDq1zwX6j8LZKiQKU5p3zREI2KpPfcJnqwF7SC4bWsq6EYu+r2JT/Sa9ffT4YojWW+heNiPqCIU9wm0ndI5QEZckb9B43ycQTsK/BVz2UbnTiJMS0CdQGlqn96/jJpZTeQ0nAtMiiLvNneV0q15e5kam0bDeJLLxn7RhZ7pq773BoZFDZJ46ZckHt8ofUjmaKiwTa/w4Rzzz28vymWTPUgbgaLgy8W7r4ZgmuFCpvl1d7krIfYoDaZheggrvlY868i+jQ/8tW9FMu7dt6f6MCqdc+xPhN6Jp0ktal5aif0aqXNc2IFV12gLZFx5gFh8DVW85xYRkRWGgg3S7HzgUzHKnH5wIXrLGkttcnuV+RMvr+s1WNtjvQI6vrccTnns1AxUhcnD7uJR5YwkQlR33YcZ4CYZfopamEovunsZLdxQGu63v0+Kyasc+4K3eQiab91ABaDYAmwzLGv59keL6+8Nx15tLeUp2g/Ze5bGZyd8Im1KfVFxK4JJ/Ez1Ydpa4+Oj5q0nKB4kaAkFeTlAx5sZa15B08yMy8YA+KUHB7n1T60xIu3uMMo2XlSz5mdeaC+/UKCoVNbxqkSbcerwZqi5cs="
+        - secure: __GITHUB_TOKEN__
     - stage: "[frontend] unit test"
       before_install:
         - cd front
@@ -69,4 +69,4 @@ jobs:
       script:
         - "curl -H 'Content-Type: application/json' --data '{\"build\": true}' -X POST https://registry.hub.docker.com/u/pando85/quotes-simple-web/trigger/$DOCKERHUB_TOKEN/"
       env:
-        - secure: SfiY9uISI68XSyKxUUP/uWxM8fnDpEJ/XxcJqQdtNMEfxx2iE5chv0aaTpWel2+V5oCkwZXu33LKGvVRyVUJ46wGlhoGSGMk8H7J3fW2sHWQImmjdShFrZD9HM3FSJGs3ccev78OP6UBWCS68VFSIg8ZaFFhilswKBkduvfoaNfSP3gh4W2JjRmENiYaYcxsp1LacebcHYLCLQtZGatg94BPZiUqpag56aJungLwoXIE38sYfl27wpwX/GHJAReTW7QT1CBsU/RpFO0orTcPWQ5wu0KEKFo1IwxVpwoCa95BQNe9keLOsyt5t15AMZoYKHvs26Tks9k93VqjJpaC+r54Sfejbk1mLpE6Y6nNomKL1+qLRIDbNINpwBiMYiyvYows8ucCiOmHDA54uDMNwH9llGL0+li/rKbvsR08kDnKSgRB0c28DL1NVaL8qmOZYw9ihbpTeJGyJW5/Nxkkc3SsXoJ0FpHjsgr3PEbo4utScKgma9o/rJQQNShcy3my+y5lUMIDi81SkL0oH7u2FBJ9hONapG46YqHaJvzTCA9GcycZI3Ld3Y7DYzcw8usgMVWF+hBExg+ntZbG2OzOgGjNaxd3Cz9NuSooN/SGuDn+Pz6xdyx+npESKogX4wpijsetgOd0tTZTibmH+Mpgy8rN1N+qAyzV443ygc4GjAg=
+        - secure: __DOCKERHUB_TOKEN__
