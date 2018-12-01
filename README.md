@@ -1,5 +1,9 @@
 # __MY_APP__
 
+This is a template for python projects.
+
+Exists a branch for aiohttp projects. You can use it replacing `master` by `aiohttp` in next steps.
+
 Set this repo as remote and merge to yours.
 And then, replace `__MY_APP__` with your python package desired name.
 ```bash
