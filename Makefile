@@ -1,7 +1,8 @@
 .PHONY: help requirements requirements_test lint test run
 
 APP := __MY_APP__
-VENV_BASE ?= .venv/$(APP)
+WORKON_HOME ?= .venv
+VENV_BASE := $(WORKON_HOME)/$(APP)
 VENV_ACTIVATE := $(VENV_BASE)/bin/activate
 PYTHON := ${VENV_BASE}/bin/python3
 
