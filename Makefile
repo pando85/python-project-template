@@ -1,17 +1,17 @@
 .PHONY: help requirements requirements_test lint test run
 
 APP := __MY_APP__
-VENV_BASE ?= .venv/$(APP)
-VENV_ACTIVATE := $(VENV_BASE)/bin/activate
-PYTHON := ${VENV_BASE}/bin/python3
+WORKON_HOME ?= .venv/$(APP)
+VENV_ACTIVATE := $(WORKON_HOME)/bin/activate
+PYTHON := ${WORKON_HOME}/bin/python3
 
 .DEFAULT: help
 help:
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##/\n\t/'
 
 venv:	## create virtualenv
-	@if [ ! -d "$(VENV_BASE)" ]; then \
-		virtualenv -p python3 $(VENV_BASE); \
+	@if [ ! -d "$(WORKON_HOME)" ]; then \
+		virtualenv -p python3 $(WORKON_HOME); \
 	fi
 
 requirements:	## install requirements
