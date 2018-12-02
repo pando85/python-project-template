@@ -40,6 +40,6 @@ jobs:
     - stage: dockerhub-build
       install: skip
       script:
-        - "curl -H 'Content-Type: application/json' --data '{\"build\": true}' -X POST https://registry.hub.docker.com/u/pando85/quotes-simple-web/trigger/$DOCKERHUB_TOKEN/"
+        - "curl -H 'Content-Type: application/json' --data '{\"build\": true}' -X POST https://registry.hub.docker.com/u/$TRAVIS_REPO_SLUG/trigger/$DOCKERHUB_TOKEN/"
       env:
         - secure: __DOCKERHUB_TOKEN__
