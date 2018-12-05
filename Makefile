@@ -1,4 +1,4 @@
-.PHONY: help requirements requirements_test lint test run
+.PHONY: help requirements requirements_test lint test run destroy_db init_db
 
 APP := __MY_APP__
 WORKON_HOME ?= .venv
@@ -39,5 +39,19 @@ test: lint
 	@${PYTHON} -m coverage report -m
 
 run:	## run project
-run: requirements
-	${PYTHON} -m ${APP}
+run: requirements init_db
+	@while ! docker exec postgres psql --host=localhost --username=test -c 'SELECT 1' &> /dev/null; do \
+	 	echo 'Waiting for postgres...'; \
+	 	sleep 1; \
+	done;
+	@${PYTHON} -m ${APP}
+
+destroy_db:	## destroy docker database
+	@echo Destroy postgres
+	@docker rm -f postgres > /dev/null || echo Not postgres running
+
+init_db:	## create docker database
+init_db: destroy_db
+	@echo Starting postgres
+	@docker run -d --name postgres -e POSTGRES_DB=test -e POSTGRES_USER=test \
+	-e POSTGRES_PASSWORD=test1234 -p 5432:5432 postgres > /dev/null

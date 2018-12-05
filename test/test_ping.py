@@ -2,12 +2,13 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 import unittest
 
 from __MY_APP__.app import get_app
+from __MY_APP__.db import setup_db
 
 
 class RoutesTests(AioHTTPTestCase):
 
     async def get_application(self):
-        return get_app()
+        return get_app(setup_db)
 
     @unittest_run_loop
     async def test_ping(self, url='/ping'):
