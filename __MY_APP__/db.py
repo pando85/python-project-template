@@ -2,6 +2,8 @@ import aiohttp
 import asyncpg
 import passlib.hash
 
+from typing import Optional
+
 from __MY_APP__.config import (ADMIN_USER, ADMIN_PASSWORD, POSTGRES_HOST, POSTGRES_PORT,
                                POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
 from __MY_APP__ import logger
@@ -28,9 +30,12 @@ async def create_user(conn: asyncpg.connect, user: User) -> asyncpg.Record:
     ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password))
 
 
-async def get_user(conn: asyncpg.connection, username: str) -> User:
+async def get_user(conn: asyncpg.connection, username: str) -> Optional[User]:
     row = await conn.fetchrow(
         f'SELECT * FROM {USERS_TABLE_NAME} WHERE username = $1', username)
+
+    if not row:
+        return None
     return User(**dict(row))
 
 
