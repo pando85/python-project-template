@@ -1,20 +1,31 @@
-import unittest
+import asyncpg
+import passlib
 
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+from asyncpg import _testbase as tb
 
-from __MY_APP__.app import get_app
-from __MY_APP__.db import setup_db
+from __MY_APP__.db import USERS_TABLE_NAME, init_db, create_user, get_user
+from __MY_APP__.user import User
 
 
-class DBTests(AioHTTPTestCase):
+async def count_rows(con: asyncpg.connect, table: str):
+    r = await con.fetchrow(f'SELECT COUNT(*) FROM {table}')
+    return r['count']
 
-    async def get_application(self):
-        return get_app(setup_db)
 
-    @unittest_run_loop
+class TestDB(tb.ConnectedTestCase):
+
+    async def test_create_user(self):
+        await init_db(self.con)
+        test_user = User('test', 'test1234')
+        rows_len = await count_rows(self.con, USERS_TABLE_NAME)
+        await create_user(self.con, test_user)
+        rows_len_after = await count_rows(self.con, USERS_TABLE_NAME)
+        self.assertEqual(rows_len_after - rows_len, 1)
+
     async def test_get_user(self):
-        pass
-
-
-if __name__ == '__main__':
-    unittest.main()
+        await init_db(self.con)
+        test_user = User('admin', 'admin')
+        user = await get_user(self.con, test_user.username)
+        self.assertEqual(test_user.username, user.username)
+        is_verified = passlib.hash.pbkdf2_sha256.verify(test_user.password, user.password)
+        self.assertEqual(is_verified, True)

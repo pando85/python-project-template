@@ -49,7 +49,6 @@ async def init_db(conn: asyncpg.connect) -> None:
 
     logger.info(f'Create admin user')
     await create_user(conn, User(ADMIN_USER, ADMIN_PASSWORD))
-    await conn.close()
 
 
 async def setup_db(app: aiohttp.web.Application) -> None:
