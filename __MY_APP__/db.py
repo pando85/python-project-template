@@ -2,12 +2,11 @@ import aiohttp
 import asyncpg
 import passlib.hash
 
-from typing import Optional
-
 from __MY_APP__.config import (ADMIN_USER, ADMIN_PASSWORD, POSTGRES_HOST, POSTGRES_PORT,
                                POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
 from __MY_APP__ import logger
-from __MY_APP__.user import User
+from __MY_APP__.user import User, to_dict
+from __MY_APP__.typing import Maybe, Error, Success
 
 USERS_TABLE_NAME = 'users'
 
@@ -24,18 +23,18 @@ async def check_table_exists(conn: asyncpg.connect, table: str) -> bool:
     return r['exists']
 
 
-async def create_user(conn: asyncpg.connect, user: User) -> asyncpg.Record:
+async def _create_user(conn: asyncpg.connect, user: User) -> asyncpg.Record:
     await conn.execute(f'''
         INSERT INTO {USERS_TABLE_NAME}(username, password) VALUES($1, $2)
     ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password))
 
 
-async def get_user(conn: asyncpg.connection, username: str) -> Optional[User]:
+async def _get_user(conn: asyncpg.connection, username: str) -> Maybe[User]:
     row = await conn.fetchrow(
         f'SELECT * FROM {USERS_TABLE_NAME} WHERE username = $1', username)
 
     if not row:
-        return None
+        return Error("'user does not exists'", 422)
     return User(**dict(row))
 
 
@@ -53,7 +52,7 @@ async def init_db(conn: asyncpg.connect) -> None:
     ''')
 
     logger.info(f'Create admin user')
-    await create_user(conn, User(ADMIN_USER, ADMIN_PASSWORD))
+    await _create_user(conn, User(ADMIN_USER, ADMIN_PASSWORD))
 
 
 async def setup_db(app: aiohttp.web.Application) -> None:
@@ -65,3 +64,24 @@ async def setup_db(app: aiohttp.web.Application) -> None:
         password=POSTGRES_PASSWORD)
     async with app['pool'].acquire() as connection:
         await init_db(connection)
+
+
+async def create_user(request: aiohttp.web.Request) -> Maybe[Success]:
+    pool = request.app['pool']
+    user_request = User(**(await request.json()))
+
+    async with pool.acquire() as connection:
+        get_user_response = await _get_user(connection, user_request.username)
+        if isinstance(get_user_response, User):
+            return Error("'user already exist'", 409)
+        await _create_user(connection, user_request)
+    return Success(to_dict(user_request), 201)
+
+
+async def get_user(request: aiohttp.web.Request) -> Maybe[User]:
+    pool = request.app['pool']
+    user_request = User(**(await request.json()))
+
+    async with pool.acquire() as connection:
+        user = await _get_user(connection, user_request.username)
+    return user

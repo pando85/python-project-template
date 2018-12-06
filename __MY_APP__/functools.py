@@ -1,5 +1,7 @@
 from inspect import iscoroutinefunction
-from typing import Any, Callable,  Optional, TypeVar
+from typing import Any, Callable, TypeVar
+
+from __MY_APP__.typing import Maybe, Error
 
 T = TypeVar('T')
 
@@ -22,7 +24,7 @@ def compose(*funcs: Any) -> Callable:
     return _func
 
 
-def bind(f: Callable, x: Optional[T]) -> Any:
-    if x is None:
-        return None
+def bind(f: Callable, x: Maybe[T]) -> Any:
+    if isinstance(x, Error):
+        return x
     return f(x)

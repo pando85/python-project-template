@@ -10,10 +10,16 @@ def cli(loop, aiohttp_client):
     return loop.run_until_complete(aiohttp_client(app))
 
 
-async def test_auth_correct_password(cli):
+async def test_auth(cli):
     resp = await cli.post('/auth', json={'username': 'admin', 'password': 'admin'})
     assert resp.status == 200
-    assert await resp.json() == {'verified': True}
+    assert await resp.json() == {'token': 'TODO'}
+
+
+async def test_auth_incorret_user(cli):
+    resp = await cli.post('/auth', json={'username': 'foo', 'password': 'foo'})
+    assert resp.status == 422
+    assert await resp.json() == "'user does not exists'"
 
 
 async def test_auth_incorret_password(cli):
