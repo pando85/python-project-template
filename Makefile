@@ -35,7 +35,7 @@ lint: requirements_test
 test:	## run tests and show report
 test: lint
 	@echo Running tests
-	@${PYTHON} -m coverage run -m pytest test
+	@LOG_LEVEL=DEBUG ${PYTHON} -m coverage run -m pytest test
 	@${PYTHON} -m coverage report -m
 
 run:	## run project
