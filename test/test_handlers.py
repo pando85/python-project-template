@@ -28,8 +28,15 @@ async def test_auth_incorret_password(cli):
     assert await resp.json() == "'password does not match'"
 
 
-async def test_user(cli):
+async def test_user_add(cli):
     user = {'username': 'test2', 'password': 'test1234'}
     resp = await cli.post('/user', json=user)
     assert resp.status == 201
+    assert await resp.json() == user
+
+
+async def test_user_add_exist_user(cli):
+    user = {'username': 'admin', 'password': 'test1234'}
+    resp = await cli.post('/user', json=user)
+    assert resp.status == 200
     assert await resp.json() == user

@@ -11,7 +11,7 @@ from __MY_APP__.typing import Maybe, Error, Success
 USERS_TABLE_NAME = 'users'
 
 
-async def check_table_exists(conn: asyncpg.connect, table: str) -> bool:
+async def _check_table_exists(conn: asyncpg.connect, table: str) -> bool:
     r = await conn.fetchrow(f'''
         SELECT EXISTS (
             SELECT 1
@@ -23,10 +23,21 @@ async def check_table_exists(conn: asyncpg.connect, table: str) -> bool:
     return r['exists']
 
 
-async def _create_user(conn: asyncpg.connect, user: User) -> asyncpg.Record:
+async def _create_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
+    try:
+        await conn.execute(f'''
+            INSERT INTO {USERS_TABLE_NAME}(username, password) VALUES($1, $2)
+        ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password))
+    except asyncpg.exceptions.UniqueViolationError:
+        return Error("'user already exists'", 409)
+    return user
+
+
+async def _update_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
     await conn.execute(f'''
-        INSERT INTO {USERS_TABLE_NAME}(username, password) VALUES($1, $2)
+        UPDATE {USERS_TABLE_NAME} SET password = $2 WHERE username = $1
     ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password))
+    return user
 
 
 async def _get_user(conn: asyncpg.connection, username: str) -> Maybe[User]:
@@ -39,7 +50,7 @@ async def _get_user(conn: asyncpg.connection, username: str) -> Maybe[User]:
 
 
 async def init_db(conn: asyncpg.connect) -> None:
-    if await check_table_exists(conn, USERS_TABLE_NAME):
+    if await _check_table_exists(conn, USERS_TABLE_NAME):
         logger.info('Already initializated.')
         return
 
@@ -71,11 +82,13 @@ async def create_user(request: aiohttp.web.Request) -> Maybe[Success]:
     user_request = User(**(await request.json()))
 
     async with pool.acquire() as connection:
-        get_user_response = await _get_user(connection, user_request.username)
-        if isinstance(get_user_response, User):
-            return Error("'user already exist'", 409)
-        await _create_user(connection, user_request)
-    return Success(to_dict(user_request), 201)
+        maybe_user = await _create_user(connection, user_request)
+        if isinstance(maybe_user, User):
+            return Success(to_dict(maybe_user), 201)
+        maybe_user = await _update_user(connection, user_request)
+        if isinstance(maybe_user, User):
+            return Success(to_dict(maybe_user), 200)
+    return maybe_user
 
 
 async def get_user(request: aiohttp.web.Request) -> Maybe[User]:
