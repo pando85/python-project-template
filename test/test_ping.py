@@ -1,22 +1,19 @@
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
-import unittest
+import pytest
 
 from __MY_APP__.app import get_app
 from __MY_APP__.db import setup_db
 
 
-class RoutesTests(AioHTTPTestCase):
+@pytest.fixture
+def cli(loop, aiohttp_client):
+    app = get_app(setup_db)
+    return loop.run_until_complete(aiohttp_client(app))
 
     async def get_application(self):
         return get_app(setup_db)
 
-    @unittest_run_loop
-    async def test_ping(self, url='/ping'):
-        request = await self.client.request('GET', url)
-        assert request.status == 200
-        response = await request.json()
-        assert response == 'pong'
 
-
-if __name__ == '__main__':
-    unittest.main()
+async def test_auth(cli):
+    resp = await cli.get('/ping')
+    assert resp.status == 200
+    assert await resp.json() == 'pong'
