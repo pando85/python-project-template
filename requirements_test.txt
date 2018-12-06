@@ -3,3 +3,4 @@ pycodestyle
 coverage
 flake8
 mypy
+pytest
