@@ -8,6 +8,7 @@ Branchs availables:
 - aiohttp
 - aiohttp-postgres
 - aiohttp-rabbitmq
+- aiohttp-postgres-rabbitmq
 
 Set this repo as remote and merge to yours.
 And then, replace `__MY_APP__` with your python package desired name.
