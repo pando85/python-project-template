@@ -1,4 +1,4 @@
-.PHONY: help requirements requirements_test lint test run
+.PHONY: help requirements requirements_test lint test run destroy_mq init_mq
 
 APP := __MY_APP__
 WORKON_HOME ?= .venv
@@ -33,11 +33,25 @@ lint: requirements_test
 	@${PYTHON} -m mypy --ignore-missing-imports ${APP} test
 
 test:	## run tests and show report
-test: lint
+test: lint init_mq
 	@echo Running tests
 	@LOG_LEVEL=DEBUG ${PYTHON} -m coverage run -m pytest test
 	@${PYTHON} -m coverage report -m
 
 run:	## run project
-run: requirements
+run: requirements init_mq
 	${PYTHON} -m ${APP}
+
+destroy_mq:    ## destroy docker mq
+	@echo Destroy rabbit
+	@docker rm -f rabbit > /dev/null || echo Not postgres running
+
+init_mq:       ## create docker mq
+init_mq: destroy_mq
+	@echo Starting rabbit
+	@docker run -d --hostname localhost --name rabbit -e RABBITMQ_DEFAULT_USER=test \
+		-e RABBITMQ_DEFAULT_PASS=test1234 -p 5672:5672 rabbitmq:3 > /dev/null
+	@while ! docker exec rabbit rabbitmqctl status &> /dev/null; do \
+		echo 'Waiting for rabbit...'; \
+		sleep 1; \
+	done;
