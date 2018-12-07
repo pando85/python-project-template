@@ -1,12 +1,11 @@
 import pytest
 
 from __MY_APP__.app import get_app
-from __MY_APP__.db import setup_db
 
 
 @pytest.fixture
 def cli(loop, aiohttp_client):
-    app = get_app(setup_db)
+    app = get_app()
     return loop.run_until_complete(aiohttp_client(app))
 
 
