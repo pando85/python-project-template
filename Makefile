@@ -51,7 +51,8 @@ init_db: destroy_db
 	@echo Starting postgres
 	@docker run -d --name postgres -e POSTGRES_DB=test -e POSTGRES_USER=test \
 	-e POSTGRES_PASSWORD=test1234 -p 5432:5432 postgres > /dev/null
-	@while ! docker exec postgres psql --host=localhost --username=test -c 'SELECT 1' &> /dev/null; do \
+	@while ! docker exec postgres psql --host=localhost --username=test -c 'SELECT 1' \
+			>/dev/null 2>&1; do \
 	 	echo 'Waiting for postgres...'; \
 	 	sleep 1; \
 	done;
