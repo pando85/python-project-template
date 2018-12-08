@@ -24,6 +24,7 @@ jobs:
       before_script:
         # Disable services enabled by default
         - sudo service postgresql stop
+        - sudo service rabbitmq-server stop
       script:
         - make test
     - stage: "update-dependencies"
@@ -33,6 +34,7 @@ jobs:
       before_script:
         # Disable services enabled by default
         - sudo service postgresql stop
+        - sudo service rabbitmq-server stop
       script:
         - bash scripts/update_dependencies.sh
       after_success:
