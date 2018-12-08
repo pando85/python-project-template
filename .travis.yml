@@ -4,9 +4,15 @@ language: python
 python:
   - '3.6'
 
+# Only execute travis in master or PR to master
+branches:
+  only:
+  - master
+
 stages:
   - name: "unit tests"
   - name: "update-dependencies"
+    if: branch = master AND type != pull_request
   - name: dockerhub-build
     if: branch = master AND type != pull_request
 
