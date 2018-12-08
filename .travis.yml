@@ -12,7 +12,6 @@ branches:
 stages:
   - name: "unit tests"
   - name: "update-dependencies"
-    if: branch = master AND type != pull_request
   - name: dockerhub-build
     if: branch = master AND type != pull_request
 
@@ -29,7 +28,6 @@ jobs:
     - stage: "update-dependencies"
       install:
         - pip install -r requirements_test.txt
-        - bash scripts/update_dependencies.sh
       before_script:
         # Disable services enabled by default
         - sudo service postgresql stop
