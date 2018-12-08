@@ -51,7 +51,8 @@ init_mq: destroy_mq
 	@echo Starting rabbit
 	@docker run -d --hostname localhost --name rabbit -e RABBITMQ_DEFAULT_USER=test \
 		-e RABBITMQ_DEFAULT_PASS=test1234 -p 5672:5672 rabbitmq:3 > /dev/null
-	@while ! docker exec rabbit rabbitmqctl status &> /dev/null; do \
+	@sleep 2
+	@while ! docker exec rabbit rabbitmqctl status >/dev/null 2>&1; do \
 		echo 'Waiting for rabbit...'; \
 		sleep 1; \
 	done;
